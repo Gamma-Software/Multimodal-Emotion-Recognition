@@ -118,12 +118,11 @@ def show_webcam() :
     predictor_landmarks  = dlib.shape_predictor("Models/face_landmarks.dat")
 
     video_capture = cv2.VideoCapture('video.mp4')
-
+    frame_index = 0
     while (video_capture.isOpened()):
         # Capture frame-by-frame
         ret, frame = video_capture.read()
-
-        face_index = 0
+        frame_index += 1
         
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         rects = face_detect(gray, 1)
