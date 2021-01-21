@@ -4,6 +4,7 @@ from __future__ import division
 import numpy as np
 import pandas as pd
 import cv2
+import datetime
 
 from time import time
 from time import sleep
@@ -32,7 +33,7 @@ global input_shape
 global nClasses
 
 def show_webcam() :
-
+    first_time = datetime.datetime.now()
     shape_x = 48
     shape_y = 48
     input_shape = (shape_x, shape_y, 1)
@@ -235,9 +236,11 @@ def show_webcam() :
                                              ignore_index=True)
 
         #cv2.imshow('Video', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q') or frame_index == 10:
+        if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
             break
 
+    later_time = datetime.datetime.now()
+    print("Process time: ", later_time - first_time)
     metric_output.to_csv('metrics.csv')
 
     # When everything is done, release the capture
