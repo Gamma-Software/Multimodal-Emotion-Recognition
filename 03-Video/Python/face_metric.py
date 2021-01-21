@@ -37,6 +37,8 @@ def show_webcam() :
     shape_y = 48
     input_shape = (shape_x, shape_y, 1)
     nClasses = 7
+    display_frame = False
+    metric_output = pd.DataFrame(columns=["Faces", "Emotions"])
 
     thresh = 0.25
     frame_check = 20
@@ -225,10 +227,18 @@ def show_webcam() :
             cv2.drawContours(frame, [eblHull], -1, (0, 255, 0), 1)
         
         cv2.putText(frame, 'Number of Faces : ' + str(len(rects)),(40, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, 155, 1)
-        cv2.imshow('Video', frame)
-        
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+
+        print("Frame index: ", frame_index, ' / Number of Faces : ', str(len(rects)))
+        metric_output = metric_output.append({'Faces': len(rects),
+                                              'Emotions': [np.argmax(prediction[i, :])
+                                                           for i in range(np.shape(prediction)[0])]},
+                                             ignore_index=True)
+
+        #cv2.imshow('Video', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q') or frame_index == 10:
             break
+
+    metric_output.to_csv('metrics.csv')
 
     # When everything is done, release the capture
     video_capture.release()
