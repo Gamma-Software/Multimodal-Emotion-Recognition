@@ -56,6 +56,7 @@ def show_webcam():
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         rects = face_detect(gray, 1)
 
+        emotions = []
         for (i, rect) in enumerate(rects):
             # Identify face coordinates
             (x, y, w, h) = face_utils.rect_to_bb(rect)
@@ -77,12 +78,12 @@ def show_webcam():
 
             # Make Prediction
             prediction = model.predict(face)
+            emotions = np.append(emotions, emotion_list[np.argmax(prediction[0, :][i])])
 
             # TODO sauvegarder la photo zoomee
 
         metric_output = metric_output.append({'Faces': len(rects),
-                                              'Emotions': [emotion_list[np.argmax(prediction[i, :])]
-                                                           for i in range(len(rects))]},
+                                              'Emotions': emotions},
                                              ignore_index=True)
         print(metric_output.tail(1))
 
