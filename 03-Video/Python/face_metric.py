@@ -32,7 +32,7 @@ global shape_y
 global input_shape
 global nClasses
 
-def show_webcam():
+def show_webcam(parameters):
     first_time = datetime.datetime.now()
     shape_x = 48
     shape_y = 48
@@ -44,7 +44,7 @@ def show_webcam():
     model = load_model('Models/video.h5')
     face_detect = dlib.get_frontal_face_detector()
 
-    video_capture = cv2.VideoCapture('video.mp4')
+    video_capture = cv2.VideoCapture(parameters.input_video)
 
     while video_capture.isOpened():
         # Capture frame-by-frame
@@ -92,7 +92,7 @@ def show_webcam():
 
     later_time = datetime.datetime.now()
     print("Process time: ", later_time - first_time)
-    metric_output.to_csv('metrics.csv')
+    metric_output.to_csv(parameters.output_metrics)
 
     # When everything is done, release the capture
     video_capture.release()
@@ -100,7 +100,16 @@ def show_webcam():
 
 
 def main():
-    show_webcam()
+    parameters = parse_argument()
+    show_webcam(parameters)
+
+
+def parse_argument():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', '--input_video', help="Path input video")
+    parser.add_argument('-o', '--output_metrics', default="metrics.csv", help="Path to the output metrics")
+    args = parser.parse_args()
+    return args
 
 
 if __name__ == "__main__":
