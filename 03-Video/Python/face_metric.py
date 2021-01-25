@@ -116,6 +116,21 @@ def process_video(parameters):
     cv2.destroyAllWindows()
 
 
+from bokeh.plotting import figure
+from bokeh.models import ColumnDataSource
+import pandas_bokeh
+
+def plot_result(parameters):
+    result = pd.read_csv(parameters.data)
+    result = result.drop(["Unnamed: 0"], axis=1)
+
+    """source = ColumnDataSource(result)
+    plot = figure()
+    result.plot_bokeh(kind="line", title="Title", figsize=(1000, 600), xlabel="frame", ylabel="ylabel")"""
+    print(result["Emotions"].tolist())
+    print(max(set(result["Emotions"].to_list()), key=result["Emotions"].to_list().count))
+
+
 def main():
     parameters = parse_argument()
     process_video(parameters)
@@ -123,9 +138,19 @@ def main():
 
 def parse_argument():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input_video', help="Path input video")
-    parser.add_argument('-o', '--output_metrics', default="metrics.csv", help="Path to the output metrics")
+    subparsers = parser.add_subparsers()
+
+    process_video_parser = subparsers.add_parser('process_video')
+    process_video_parser.add_argument('-i', '--input_video', help="Path input video")
+    process_video_parser.add_argument('-o', '--output_metrics', default="metrics.csv", help="Path to the output metrics")
+    process_video_parser.set_defaults(func=process_video)
+
+    plot_result_parser = subparsers.add_parser('plot_result')
+    plot_result_parser.add_argument('-d', '--data', help="Path to video metrics")
+    plot_result_parser.set_defaults(func=plot_result)
+
     args = parser.parse_args()
+    args.func(args)
     return args
 
 
