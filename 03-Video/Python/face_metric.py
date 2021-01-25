@@ -94,9 +94,9 @@ def process_video(parameters):
             # Make Prediction
             prediction = model.predict(face)
             if len(rects) == 1:
-                emotions = np.append(emotions, emotion_list[np.argmax(prediction[0, :])])
+                emotions = np.append(emotions, np.argmax(prediction[0, :]))
             else:
-                emotions = np.append(emotions, emotion_list[np.argmax(prediction[0, :][i])])
+                emotions = np.append(emotions, np.argmax(prediction[0, :][i]))
 
             # TODO sauvegarder la photo zoomee
 
