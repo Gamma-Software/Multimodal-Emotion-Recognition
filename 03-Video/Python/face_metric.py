@@ -46,7 +46,7 @@ def process_video(parameters):
     first_time = datetime.datetime.now()
     shape_x = 48
     shape_y = 48
-    emotion_list = ["Angry", "Disgust", "Fear", "Happy", "Sad", "Surprise", "Neutral"]
+    emotion_list = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
     frame_index = 0
     display_frame = False
     metric_output = pd.DataFrame(columns=["Faces", "Emotions"])
