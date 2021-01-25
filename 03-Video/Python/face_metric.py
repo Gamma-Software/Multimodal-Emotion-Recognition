@@ -6,6 +6,7 @@ import pandas as pd
 import cv2
 import datetime
 
+from tqdm import tqdm
 from time import time
 from time import sleep
 import re
@@ -32,7 +33,16 @@ global shape_y
 global input_shape
 global nClasses
 
-def show_webcam(parameters):
+
+def get_video_metadata(video):
+    length = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = video.get(cv2.CAP_PROP_FPS)
+    return length, width, height, fps
+
+
+def process_video(parameters):
     first_time = datetime.datetime.now()
     shape_x = 48
     shape_y = 48
@@ -45,8 +55,13 @@ def show_webcam(parameters):
     face_detect = dlib.get_frontal_face_detector()
 
     video_capture = cv2.VideoCapture(parameters.input_video)
+    length, width, height, fps = get_video_metadata(video_capture)
+    print(length, width, height, fps)
+    pbar = tqdm(total=length)
 
     while video_capture.isOpened():
+        # Update progress bar
+        pbar.update(1)
         # Capture frame-by-frame
         ret, frame = video_capture.read()
         if not ret:
@@ -78,14 +93,16 @@ def show_webcam(parameters):
 
             # Make Prediction
             prediction = model.predict(face)
-            emotions = np.append(emotions, emotion_list[np.argmax(prediction[0, :][i])])
+            if len(rects) == 1:
+                emotions = np.append(emotions, emotion_list[np.argmax(prediction[0, :])])
+            else:
+                emotions = np.append(emotions, emotion_list[np.argmax(prediction[0, :][i])])
 
             # TODO sauvegarder la photo zoomee
 
         metric_output = metric_output.append({'Faces': len(rects),
                                               'Emotions': emotions},
                                              ignore_index=True)
-        print(metric_output.tail(1))
 
         if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
             break
@@ -101,7 +118,7 @@ def show_webcam(parameters):
 
 def main():
     parameters = parse_argument()
-    show_webcam(parameters)
+    process_video(parameters)
 
 
 def parse_argument():
