@@ -11,6 +11,7 @@ from time import time
 from time import sleep
 import re
 import os
+import math
 
 import argparse
 from collections import OrderedDict
@@ -116,29 +117,40 @@ def process_video(parameters):
     return
 
 
-from bokeh.plotting import figure
-from bokeh.models import ColumnDataSource
-import pandas_bokeh
 
-def truncate(f, n):
-    '''Truncates/pads a float f to n decimal places without rounding'''
-    s = '{}'.format(f)
-    if 'e' in s or 'E' in s:
-        return '{0:.{1}f}'.format(f, n)
-    i, p, d = s.partition('.')
-    return '.'.join([i, (d+'0'*n)[:n]])
+
+def truncate(number, digits) -> float:
+    stepper = 10.0 ** digits
+    return math.trunc(stepper * number) / stepper
+
+
+def most_frequent(List):
+    counter = 0
+    num = List[0]
+
+    for i in List:
+        curr_frequency = List.count(i)
+        if (curr_frequency > counter):
+            counter = curr_frequency
+            num = i
+
+    return num
 
 def plot_result(parameters):
+    print("What's the predominant emotion ?")
     emotion_list = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
 
     result = pd.read_csv(parameters.data)
-    result = result.drop(["Unnamed: 0"], axis=1)
+
+    print(emotion_list[result["Emotions"].value_counts().idxmax()])
 
     """source = ColumnDataSource(result)
     plot = figure()
     result.plot_bokeh(kind="line", title="Title", figsize=(1000, 600), xlabel="frame", ylabel="ylabel")"""
-    print([result["Emotions"].tolist().count(i) for i, emotion in enumerate(emotion_list)])
-    print([truncate(result["Emotions"].tolist().count(i)/result.tail(1)["Frame"].item()*100, 2) for i, emotion in enumerate(emotion_list)])
+
+    # input options
+    clean_result = pd.DataFrame({'Emotion': emotion_list,
+                                 'Iterations': [result["Emotions"].tolist().count(i) for i, emotion in enumerate(emotion_list)]})
     return
 
 
