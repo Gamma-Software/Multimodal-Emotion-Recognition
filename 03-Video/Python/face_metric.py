@@ -49,7 +49,7 @@ def process_video(parameters):
     emotion_list = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
     frame_index = 0
     display_frame = False
-    metric_output = pd.DataFrame(columns=["Faces", "Emotions"])
+    metric_output = pd.DataFrame(columns=["Frame", "Faces", "Emotions"])
 
     model = load_model('Models/video.h5')
     face_detect = dlib.get_frontal_face_detector()
@@ -71,7 +71,6 @@ def process_video(parameters):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         rects = face_detect(gray, 1)
 
-        emotions = []
         for (i, rect) in enumerate(rects):
             # Identify face coordinates
             (x, y, w, h) = face_utils.rect_to_bb(rect)
@@ -94,15 +93,15 @@ def process_video(parameters):
             # Make Prediction
             prediction = model.predict(face)
             if len(rects) == 1:
-                emotions = np.append(emotions, np.argmax(prediction[0, :]))
+                metric_output = metric_output.append({'Frame': frame_index,
+                                                      'Faces': len(rects),
+                                                      'Emotions': np.argmax(prediction[0, :])},
+                                                     ignore_index=True)
             else:
-                emotions = np.append(emotions, np.argmax(prediction[0, :][i]))
-
-            # TODO sauvegarder la photo zoomee
-
-        metric_output = metric_output.append({'Faces': len(rects),
-                                              'Emotions': emotions},
-                                             ignore_index=True)
+                metric_output = metric_output.append({'Frame': frame_index,
+                                                      'Faces': len(rects),
+                                                      'Emotions': np.argmax(prediction[0, :][i])},
+                                                     ignore_index=True)
 
         if cv2.waitKey(1) & 0xFF == ord('q') or not ret:
             break
@@ -114,6 +113,7 @@ def process_video(parameters):
     # When everything is done, release the capture
     video_capture.release()
     cv2.destroyAllWindows()
+    return
 
 
 from bokeh.plotting import figure
