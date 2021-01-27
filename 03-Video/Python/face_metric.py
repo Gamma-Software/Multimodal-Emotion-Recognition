@@ -120,20 +120,30 @@ from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource
 import pandas_bokeh
 
+def truncate(f, n):
+    '''Truncates/pads a float f to n decimal places without rounding'''
+    s = '{}'.format(f)
+    if 'e' in s or 'E' in s:
+        return '{0:.{1}f}'.format(f, n)
+    i, p, d = s.partition('.')
+    return '.'.join([i, (d+'0'*n)[:n]])
+
 def plot_result(parameters):
+    emotion_list = ['Angry', 'Disgust', 'Fear', 'Happy', 'Sad', 'Surprise', 'Neutral']
+
     result = pd.read_csv(parameters.data)
     result = result.drop(["Unnamed: 0"], axis=1)
 
     """source = ColumnDataSource(result)
     plot = figure()
     result.plot_bokeh(kind="line", title="Title", figsize=(1000, 600), xlabel="frame", ylabel="ylabel")"""
-    print(result["Emotions"].tolist())
-    print(max(set(result["Emotions"].to_list()), key=result["Emotions"].to_list().count))
+    print([result["Emotions"].tolist().count(i) for i, emotion in enumerate(emotion_list)])
+    print([truncate(result["Emotions"].tolist().count(i)/result.tail(1)["Frame"].item()*100, 2) for i, emotion in enumerate(emotion_list)])
+    return
 
 
 def main():
     parameters = parse_argument()
-    process_video(parameters)
 
 
 def parse_argument():
